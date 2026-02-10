@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Supabase Debugger</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body {
+            font-family: monospace;
+            padding: 2rem;
+            background: #f0f0f0;
+        }
+
+        .box {
+            background: white;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+
+        .error {
+            color: red;
+        }
+
+        .success {
+            color: green;
+        }
+
+        pre {
+            white-space: pre-wrap;
+            background: #eee;
+            padding: 0.5rem;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Supabase Connection Debugger</h1>
+
+    <div class="box">
+        <h3>1. Credentials Check</h3>
+        <div id="status-creds">Checking...</div>
+    </div>
+
+    <div class="box">
+        <h3>2. Table: Categorias</h3>
+        <div id="status-cat">Loading...</div>
+        <pre id="data-cat"></pre>
+    </div>
+
+    <div class="box">
+        <h3>3. Table: Marcas</h3>
+        <div id="status-brand">Loading...</div>
+        <pre id="data-brand"></pre>
+    </div>
+
+    <div class="box">
+        <h3>4. Table: Productos</h3>
+        <div id="status-prod">Loading...</div>
+        <pre id="data-prod"></pre>
+    </div>
+
+    <!-- Import Config -->
+    <script type="module">
+        import { supabase } from './scripts/supabase-client.js';
+
+        async function runDebug() {
+            // 1. Creds
+            const credsEl = document.getElementById('status-creds');
+            if (supabase) {
+                credsEl.innerHTML = '<span class="success">Client initialized.</span>';
+            } else {
+                credsEl.innerHTML = '<span class="error">Failed to initialize client.</span>';
+                return;
+            }
+
+            // 2. Categorias
+            try {
+                const { data, error } = await supabase.from('categorias').select('*').limit(5);
+                if (error) throw error;
+                document.getElementById('status-cat').innerHTML = `<span class="success">Success! Found ${data.length} items.</span>`;
+                document.getElementById('data-cat').textContent = JSON.stringify(data, null, 2);
+            } catch (e) {
+                document.getElementById('status-cat').innerHTML = `<span class="error">Error: ${e.message}</span>`;
+                document.getElementById('data-cat').textContent = "Check RLS Policies or Table Name.";
+            }
+
+            // 3. Marcas
+            try {
+                const { data, error } = await supabase.from('marcas').select('*').limit(5);
+                if (error) throw error;
+                document.getElementById('status-brand').innerHTML = `<span class="success">Success! Found ${data.length} items.</span>`;
+                document.getElementById('data-brand').textContent = JSON.stringify(data, null, 2);
+            } catch (e) {
+                document.getElementById('status-brand').innerHTML = `<span class="error">Error: ${e.message}</span>`;
+                document.getElementById('data-brand').textContent = "Check RLS Policies or Table Name.";
+            }
+
+            // 4. Productos
+            try {
+                const { data, error } = await supabase.from('productos').select('*').limit(5);
+                if (error) throw error;
+                document.getElementById('status-prod').innerHTML = `<span class="success">Success! Found ${data.length} items.</span>`;
+                document.getElementById('data-prod').textContent = JSON.stringify(data, null, 2);
+            } catch (e) {
+                document.getElementById('status-prod').innerHTML = `<span class="error">Error: ${e.message}</span>`;
+                document.getElementById('data-prod').textContent = "Check RLS Policies or Table Name.";
+            }
+        }
+
+        runDebug();
+    </script>
+</body>
+
+</html>

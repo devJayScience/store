@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Librería Inventario Pro</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles/main.css?v=4">
+    <link rel="stylesheet" href="styles/animations.css">
+</head>
+
+<body>
+    <div class="background-blobs">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+    </div>
+
+    <div class="app-container">
+        <header class="glass-panel sidebar">
+            <div class="logo">
+                <i class="fa-solid fa-book-open-reader"></i>
+                <h1>Inventory</h1>
+            </div>
+            <button id="mobileMenuBtn" class="mobile-menu-btn">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+
+            <nav>
+                <button class="nav-btn active" data-view="inventory">
+                    <i class="fa-solid fa-boxes-stacked"></i> Inventario
+                </button>
+                <button class="nav-btn" data-view="dashboard">
+                    <i class="fa-solid fa-chart-pie"></i> Dashboard
+                </button>
+            </nav>
+
+            <div class="user-profile">
+                <img src="https://ui-avatars.com/api/?name=Admin+User&background=random" alt="Admin">
+                <div class="user-info">
+                    <p>Hola, Admin</p>
+                    <span>Gerente</span>
+                </div>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <div class="top-bar glass-panel">
+                <div class="search-container">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="text" id="searchInput" placeholder="Buscar por nombre, autor, marca...">
+                </div>
+                <div class="actions">
+                    <button class="btn btn-secondary" id="btnExport" title="Descargar reporte en Excel"
+                        style="background: rgba(16, 185, 129, 0.2); color: var(--success);">
+                        <i class="fa-solid fa-file-excel"></i> Exportar Excel
+                    </button>
+                    <button class="btn btn-primary" id="btnOpenModal">
+                        <i class="fa-solid fa-plus"></i> Nuevo Item
+                    </button>
+                </div>
+            </div>
+
+            <div id="dashboardView" class="view">
+                <div class="stats-grid">
+                    <div class="stat-card glass-panel staggered-anim">
+                        <div class="icon-box purple"><i class="fa-solid fa-book"></i></div>
+                        <div class="stat-info">
+                            <h3>Total Libros</h3>
+                            <p id="totalBooks">0</p>
+                        </div>
+                    </div>
+                    <div class="stat-card glass-panel staggered-anim">
+                        <div class="icon-box blue"><i class="fa-solid fa-pen-ruler"></i></div>
+                        <div class="stat-info">
+                            <h3>Papelería</h3>
+                            <p id="totalStationery">0</p>
+                        </div>
+                    </div>
+                    <div class="stat-card glass-panel staggered-anim">
+                        <div class="icon-box green"><i class="fa-solid fa-sack-dollar"></i></div>
+                        <div class="stat-info">
+                            <h3>Valor Total</h3>
+                            <p id="totalValue">$0.00</p>
+                        </div>
+                    </div>
+                    <div class="stat-card glass-panel staggered-anim">
+                        <div class="icon-box red"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                        <div class="stat-info">
+                            <h3>Stock Bajo</h3>
+                            <p id="lowStock">0</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="analytics-grid">
+                    <div class="glass-panel analytics-card" style="grid-column: span 2;">
+                        <div class="analytics-header">
+                            <h3><i class="fa-solid fa-arrow-trend-up"></i> Top Stock</h3>
+                            <div class="analytics-filters">
+                                <select id="dashFilterCategory" class="dash-select">
+                                    <option value="all">Todas las Categorías</option>
+                                    <option value="book">Libros</option>
+                                    <option value="stationery">Papelería</option>
+                                    <option value="art">Arte</option>
+                                    <option value="office">Oficina</option>
+                                </select>
+                                <select id="dashFilterBrand" class="dash-select">
+                                    <option value="all">Todas las Marcas</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="analytics-table">
+                                <thead>
+                                    <tr>
+                                        <th>Producto</th>
+                                        <th>Categoría</th>
+                                        <th>Marca</th>
+                                        <th>Stock</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="topStockTable"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="glass-panel analytics-card">
+                        <div class="analytics-header">
+                            <h3 style="color: var(--danger);"><i class="fa-solid fa-triangle-exclamation"></i> Stock
+                                Bajo</h3>
+                            <select id="dashFilterLowStockCat" class="dash-select">
+                                <option value="all">Todo</option>
+                                <option value="book">Libros</option>
+                                <option value="stationery">Papelería</option>
+                            </select>
+                        </div>
+                        <ul class="stock-list" id="lowStockList"></ul>
+                    </div>
+
+                    <div class="glass-panel analytics-card">
+                        <div class="analytics-header">
+                            <h3 style="color: var(--warning);"><i class="fa-solid fa-trophy"></i> Más Vendidos</h3>
+                            <select id="dashFilterBestCat" class="dash-select">
+                                <option value="all">Todo</option>
+                                <option value="book">Libros</option>
+                            </select>
+                        </div>
+                        <div class="best-sellers-list" id="bestSellersList"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="inventoryView" class="view active-view">
+                <div class="filters-bar glass-panel">
+                    <div class="filter-group">
+                        <select id="filterCategory">
+                            <option value="all">Cargando categorías...</option>
+                        </select>
+                        <select id="sortBy">
+                            <option value="newest">Más Recientes</option>
+                            <option value="priceHigh">Precio: Alto a Bajo</option>
+                            <option value="priceLow">Precio: Bajo a Alto</option>
+                            <option value="alpha">A-Z</option>
+                        </select>
+                    </div>
+                    <div class="view-toggles">
+                        <button class="toggle-btn" id="viewGrid" title="Vista Cuadrícula">
+                            <i class="fa-solid fa-border-all"></i>
+                        </button>
+                        <button class="toggle-btn active" id="viewTable" title="Vista Lista (Excel)">
+                            <i class="fa-solid fa-list"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="inventory-grid" id="inventoryGrid"></div>
+
+                <div class="inventory-table-container hidden" id="inventoryTableContainer">
+                    <table class="inventory-table">
+                        <thead>
+                            <tr>
+                                <th>Producto</th>
+                                <th>Marca</th>
+                                <th>Descripción</th>
+                                <th>Precio Venta</th>
+                                <th>Costo</th>
+                                <th>Stock</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="inventoryTableBody"></tbody>
+                    </table>
+                </div>
+
+                <div class="empty-state hidden" id="emptyState">
+                    <img src="https://cdn-icons-png.flaticon.com/512/7486/7486776.png" alt="No found">
+                    <h3>No se encontraron productos</h3>
+                    <p>Intenta ajustar tu búsqueda o filtros.</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Add/Edit Modal -->
+    <div class="modal-overlay" id="editModal">
+        <div class="modal glass-panel">
+            <h2 id="modalTitle">Nuevo Item</h2>
+            <form id="itemForm">
+                <input type="hidden" id="itemId">
+
+                <div class="form-group">
+                    <label>Nombre del Producto</label>
+                    <input type="text" id="itemName" required placeholder="Ej. El Principito">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Marca / Autor</label>
+                        <input type="text" id="itemBrand" required placeholder="Ej. Antoine de Saint-Exupéry">
+                    </div>
+                    <div class="form-group">
+                        <label>Categoría</label>
+                        <select id="itemCategorySelect">
+                            <!-- Populated by JS -->
+                        </select>
+                        <!-- Hidden input for custom category -->
+                        <input type="text" id="itemCategoryInput" disabled style="display:none; margin-top: 0.5rem;"
+                            placeholder="Escribe nueva categoría...">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Precio Venta ($)</label>
+                        <input type="number" id="itemPrice" step="0.01" required placeholder="0.00">
+                    </div>
+                    <div class="form-group">
+                        <label>Precio Costo ($)</label>
+                        <input type="number" id="itemCost" step="0.01" placeholder="0.00">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Stock Actual</label>
+                        <input type="number" id="itemStock" min="0" required placeholder="0">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Descripción</label>
+                    <textarea id="itemDescription" rows="3" placeholder="Detalles del producto..."></textarea>
+                </div>
+
+                <div class="modal-actions"
+                    style="display: flex; justify-content: center; gap: 1.5rem; margin-top: 2rem;">
+                    <button type="button" class="btn btn-secondary" id="btnCancelModal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="customAlertModal">
+        <div class="modal glass-panel center-modal">
+            <div id="alertIcon" class="alert-icon"></div>
+            <h2 id="alertTitle"></h2>
+            <p id="alertMessage"></p>
+
+            <div class="modal-actions center-actions">
+                <button class="btn btn-secondary" id="btnAlertCancel" style="display: none;">Cancelar</button>
+                <button class="btn btn-primary" id="btnAlertConfirm">Aceptar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="toast glass-panel">
+        <i class="fa-solid fa-check-circle"></i>
+        <span id="toastMessage">Operación exitosa</span>
+    </div>
+
+    <!-- Supabase JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script type="module" src="scripts/app.js"></script>
+</body>
+
+</html>

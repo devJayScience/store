@@ -1,0 +1,127 @@
+/* Animations */
+
+/* Fade In Up - for cards */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-in {
+    animation: fadeInUp 0.5s ease forwards;
+}
+
+/* Staggered entrance for dashboard */
+.staggered-anim {
+    opacity: 0;
+    animation: fadeInUp 0.5s ease forwards;
+}
+
+.staggered-anim:nth-child(1) {
+    animation-delay: 0.1s;
+}
+
+.staggered-anim:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.staggered-anim:nth-child(3) {
+    animation-delay: 0.3s;
+}
+
+.staggered-anim:nth-child(4) {
+    animation-delay: 0.4s;
+}
+
+/* Pulse - for buttons or attention */
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.05);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+.pulse:hover {
+    animation: pulse 1s infinite;
+}
+
+/* Slide In - for Toast */
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Hidden Utility */
+.hidden {
+    display: none !important;
+}
+
+/* View Transitions */
+.view {
+    display: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.view.active-view {
+    display: block;
+    animation: fadeIn 0.4s ease forwards;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+/* Empty State Float */
+.empty-state {
+    text-align: center;
+    padding: 3rem;
+    color: var(--text-secondary);
+}
+
+.empty-state img {
+    width: 100px;
+    margin-bottom: 1rem;
+    opacity: 0.6;
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+    0% {
+        transform: translateY(0px);
+    }
+
+    50% {
+        transform: translateY(-10px);
+    }
+
+    100% {
+        transform: translateY(0px);
+    }
+}

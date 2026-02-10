@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalles del Producto - Librería Inventario Pro</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles/main.css?v=4">
+    <link rel="stylesheet" href="styles/animations.css">
+    <style>
+        /* Estilos reforzados para modales más fuertes y opacos */
+        /* REMOVED: Custom overrides that forced dark theme. Now inheriting from main.css */
+    </style>
+</head>
+
+<body>
+    <div class="background-blobs">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+    </div>
+
+    <div class="app-container">
+        <header class="glass-panel sidebar">
+            <div class="logo">
+                <i class="fa-solid fa-book-open-reader"></i>
+                <h1>Inventory</h1>
+            </div>
+            <nav>
+                <a href="index.html" class="nav-btn active">
+                    <i class="fa-solid fa-arrow-left"></i> Volver al Inicio
+                </a>
+            </nav>
+            <div class="user-profile">
+                <img src="https://ui-avatars.com/api/?name=Admin+User&background=random" alt="Admin">
+                <div class="user-info">
+                    <p>Hola, Admin</p>
+                    <span>Gerente</span>
+                </div>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <div class="view active-view" style="display: block;">
+                <div id="detailsContainer" class="glass-panel details-container" style="display: none;">
+                    <div class="details-image-container">
+                        <img src="" alt="Imagen del Producto" id="detailImage" class="details-image">
+                    </div>
+                    <div class="details-info">
+                        <div class="details-header">
+                            <span class="badge" id="detailCategory">Categoría</span>
+                            <h1 id="detailName">Cargando...</h1>
+                            <p class="detail-brand" id="detailBrand">Marca</p>
+                        </div>
+
+                        <div class="detail-price-box">
+                            <span class="detail-price" id="detailPrice">$0.00</span>
+                            <span class="detail-cost" id="detailCost">Costo: $0.00</span>
+                        </div>
+
+                        <div class="detail-stock-box">
+                            <span>Stock Disponible:</span>
+                            <span class="stock-badge" id="detailStock">0</span>
+                        </div>
+
+                        <div class="detail-description">
+                            <h3>Descripción</h3>
+                            <p id="detailDescription">Sin descripción disponible.</p>
+                        </div>
+
+                        <div class="detail-actions">
+                            <button class="btn btn-primary" id="btnEdit">
+                                <i class="fa-solid fa-pen"></i> Editar
+                            </button>
+                            <button class="btn btn-danger" id="btnDelete">
+                                <i class="fa-solid fa-trash"></i> Eliminar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="loadingState" class="empty-state">
+                    <i class="fa-solid fa-spinner fa-spin" style="font-size: 2rem; color: var(--primary-color);"></i>
+                    <p>Cargando detalles...</p>
+                </div>
+
+                <div id="errorState" class="empty-state hidden">
+                    <i class="fa-solid fa-triangle-exclamation" style="font-size: 3rem; color: var(--danger);"></i>
+                    <h3>Producto No Encontrado</h3>
+                    <p>El producto que buscas no existe o ha sido eliminado.</p>
+                    <a href="index.html" class="btn btn-secondary" style="margin-top: 1rem;">Volver al Inventario</a>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div class="modal-overlay" id="editModal">
+        <div class="modal glass-panel">
+            <div class="modal-header"
+                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                <h2 style="margin: 0;">Editar Producto</h2>
+            </div>
+            <form id="editItemForm">
+                <div class="form-group">
+                    <label>Nombre del Producto</label>
+                    <input type="text" id="editName" required>
+                </div>
+
+
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Marca / Autor</label>
+                        <input type="text" id="editBrand" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Categoría</label>
+                        <select id="editCategory">
+                            <option value="book">Libro</option>
+                            <option value="stationery">Papelería</option>
+                            <option value="art">Arte</option>
+                            <option value="office">Oficina</option>
+                        </select>
+                        <input type="text" id="newCategoryInput" placeholder="Nombre de nueva categoría"
+                            style="display: none; margin-top: 0.5rem;" />
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Precio Venta ($)</label>
+                        <input type="number" id="editPrice" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Precio Costo ($)</label>
+                        <input type="number" id="editCost" step="0.01" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Stock Actual</label>
+                    <input type="number" id="editStock" required>
+                </div>
+                <div class="form-group">
+                    <label>Descripción</label>
+                    <textarea id="editDescription" rows="3"></textarea>
+                </div>
+                <div class="modal-actions"
+                    style="display: flex; justify-content: center; gap: 1.5rem; margin-top: 2rem;">
+                    <button type="button" class="btn btn-secondary" id="btnCancelEdit">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="customAlertModal">
+        <div class="modal glass-panel" style="max-width: 400px; text-align: center;">
+            <div id="alertIcon" style="font-size: 3.5rem; margin-bottom: 1rem;"></div>
+            <h2 id="alertTitle" style="margin-bottom: 0.5rem; font-size: 1.5rem;"></h2>
+            <p id="alertMessage" style="color: var(--text-secondary); margin-bottom: 2rem;"></p>
+            <div class="modal-actions" style="justify-content: center; gap: 1rem;">
+                <button class="btn btn-secondary" id="btnAlertCancel">Cancelar</button>
+                <button class="btn btn-primary" id="btnAlertConfirm">Aceptar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Supabase JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script type="module" src="scripts/details.js?v=4"></script>
+</body>
+
+</html>
