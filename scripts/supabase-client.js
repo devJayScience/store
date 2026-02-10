@@ -1,4 +1,3 @@
-
 // Initialize Supabase Client
 // TODO: Replace with your actual Supabase URL and Anon Key
 const SUPABASE_URL = 'https://hbjomyoxrttvgzmogtgt.supabase.co';
@@ -8,4 +7,5 @@ if (SUPABASE_URL === 'YOUR_SUPABASE_URL' || SUPABASE_KEY === 'YOUR_SUPABASE_ANON
     console.warn('Supabase credentials not set in scripts/supabase-client.js');
 }
 
-export const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+export const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);

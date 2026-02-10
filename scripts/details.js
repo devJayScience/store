@@ -1,4 +1,5 @@
 import { Storage } from './storage.js';
+import { UI } from './ui.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('DOM Loaded in details.js');

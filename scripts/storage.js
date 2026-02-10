@@ -1,4 +1,3 @@
-
 import { supabase } from './supabase-client.js';
 
 const STORAGE_KEY = 'bookstore_inventory_v1';
