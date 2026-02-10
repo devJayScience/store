@@ -1418,6 +1418,8 @@ nav {
         position: fixed;
         top: 0;
         left: 0;
+        right: 0;
+        /* Force span */
         z-index: 2005;
         /* Higher than sidebar/dropdown */
         background: rgba(255, 255, 255, 0.98);
@@ -1425,6 +1427,9 @@ nav {
         -webkit-backdrop-filter: blur(15px);
         border-bottom: 1px solid var(--glass-border);
         box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+
+        /* Ensure no weird flex shrinking */
+        flex-shrink: 0;
     }
 
     .mobile-top-bar .logo {
@@ -1444,8 +1449,11 @@ nav {
         cursor: pointer;
         padding: 0.5rem;
         transition: transform 0.2s;
+
+        /* FORCE RIGHT ALIGNMENT */
+        margin-left: auto !important;
         margin-right: -0.5rem;
-        /* Align visual right */
+        /* Visual alignment with padding */
     }
 
     .mobile-menu-btn:active {
