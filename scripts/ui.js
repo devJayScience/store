@@ -23,7 +23,7 @@ export const UI = {
                         <div class="card-content">
                             <div class="card-header">
                                 <h3>${item.name}</h3>
-                                <span class="badge ${item.category}">${this.getCategoryLabel(item.category)}</span>
+                                <span class="badge ${this.getCategoryClass(item.category)}">${this.getCategoryLabel(item.category)}</span>
                             </div>
                             <p class="card-brand">${item.brand}</p>
                             
@@ -123,17 +123,40 @@ export const UI = {
     },
 
     updateStats(items) {
-        const totalBooks = items.filter(i => i.category === 'book').length;
-        const totalStationery = items.filter(i => i.category === 'stationery').length;
-        const totalOther = items.filter(i => i.category === 'art' || i.category === 'office').length;
+        // Calculate Totals Dynamically
         const totalValue = items.reduce((sum, i) => sum + (parseFloat(i.price) * parseInt(i.stock)), 0);
         const lowStock = items.filter(i => i.stock < 5).length;
-        const totalItems = items.length || 1; // Avoid division by zero
+        const totalItems = items.length || 1;
 
-        this.animateValue("totalBooks", 0, totalBooks, 1000);
-        this.animateValue("totalStationery", 0, totalStationery + totalOther, 1000); // Combining stationery+art for simpler stats or keep separate? 
-        // Note: index.html has totalStationery, so maybe we map art there too or create new stat. 
-        // For now sticking to ID logic.
+        // Group by Category
+        const catCounts = items.reduce((acc, item) => {
+            const cat = item.category || 'Sin Categoría';
+            acc[cat] = (acc[cat] || 0) + 1;
+            return acc;
+        }, {});
+
+        // Debug log
+        console.log('Category Counts:', catCounts);
+
+        // Map commonly expected categories to specific UI IDs if possible, or generic fallbacks
+        // We try to match "Libros" or "Books" to 'totalBooks', otherwise we might need to adjust the HTML or just show top categories.
+        // For now, let's try to map based on keywords to keep the existing UI cards if possible.
+
+        let booksCount = 0;
+        let stationeryCount = 0;
+
+        // Simple fuzzy matching for the specific cards "Total Libros" and "Papelería"
+        Object.keys(catCounts).forEach(cat => {
+            const lower = cat.toLowerCase();
+            if (lower.includes('libro') || lower.includes('book')) {
+                booksCount += catCounts[cat];
+            } else if (lower.includes('papel') || lower.includes('stationery') || lower.includes('confiteria') || lower.includes('oficina') || lower.includes('arte')) {
+                stationeryCount += catCounts[cat]; // Grouping others into the second card for now as "Papelería/Otros"
+            }
+        });
+
+        this.animateValue("totalBooks", 0, booksCount, 1000);
+        this.animateValue("totalStationery", 0, stationeryCount, 1000);
 
         const totalValueElement = document.getElementById('totalValue');
         if (totalValueElement) {
@@ -142,10 +165,10 @@ export const UI = {
 
         this.animateValue("lowStock", 0, lowStock, 1000);
 
-        // Update Composition Bars
-        const pctBooks = Math.round((totalBooks / totalItems) * 100);
-        const pctStationery = Math.round((totalStationery / totalItems) * 100);
-        const pctOther = Math.round((totalOther / totalItems) * 100);
+        // Update Composition Bars - using the same logic
+        const pctBooks = Math.round((booksCount / totalItems) * 100);
+        const pctStationery = Math.round((stationeryCount / totalItems) * 100);
+        const pctOther = 100 - pctBooks - pctStationery; // Remainder
 
         this.updateElement('pctBooks', `${pctBooks}%`);
         this.updateStyle('barBooks', 'width', `${pctBooks}%`);
@@ -185,6 +208,8 @@ export const UI = {
     },
 
     getCategoryLabel(cat) {
+        // If the category is already a proper name (e.g. from DB), just return it.
+        // We can keep the map for legacy or fallback.
         const map = {
             'book': 'Libro',
             'stationery': 'Papelería',
@@ -194,15 +219,28 @@ export const UI = {
         return map[cat] || cat;
     },
 
+    getCategoryClass(cat) {
+        if (!cat) return 'other';
+        const lower = cat.toLowerCase();
+        if (lower.includes('libro') || lower.includes('book')) return 'book';
+        if (lower.includes('papel') || lower.includes('stationery')) return 'stationery';
+        if (lower.includes('art')) return 'art';
+        if (lower.includes('ofic') || lower.includes('office')) return 'office';
+        return 'other';
+    },
+
     // --- Analytics Dashboard Methods ---
 
     populateCategoryFilter(categories) {
-        // Populate Main Filter
-        const select = document.getElementById('filterCategory');
+        // 1. Get Unique Categories from actual data if available, or use provided list
+        // Note: categories arg might be just names or objects depending on caller. 
+        // Let's assume it's an array of strings for now.
 
-        // List of all category dropdowns to populate
+        const uniqueCats = new Set(categories.map(c => typeof c === 'object' ? c.name : c));
+
+        // 2. Target Dropdowns
         const dropdowns = [
-            select,
+            document.getElementById('filterCategory'),
             document.getElementById('dashFilterCategory'),
             document.getElementById('dashFilterLowStockCat'),
             document.getElementById('dashFilterBestCat')
@@ -210,38 +248,36 @@ export const UI = {
 
         dropdowns.forEach(dd => {
             if (!dd) return;
-            dd.innerHTML = '<option value="all">Todas las Categorías</option>'; // Reset
-            categories.forEach(cat => {
-                const val = typeof cat === 'object' ? cat.name : cat;
-                if (val === '__NEW__') return;
+            // Preset text based on ID to be user friendlier
+            let defaultText = "Todas las Categorías";
+            if (dd.id === 'dashFilterLowStockCat' || dd.id === 'dashFilterBestCat') defaultText = "Todo";
 
+            dd.innerHTML = `<option value="all">${defaultText}</option>`;
+
+            uniqueCats.forEach(cat => {
+                if (!cat) return;
+                if (cat === '__NEW__') return;
                 const opt = document.createElement('option');
-                opt.value = val;
-                opt.textContent = val.charAt(0).toUpperCase() + val.slice(1);
+                opt.value = cat; // Use exact name from DB as value
+                opt.textContent = cat; // Display exact name
                 dd.appendChild(opt);
             });
         });
 
-        // 2. Populate Modal Select
+        // 3. Populate Modal Select
         const modalSelect = document.getElementById('itemCategorySelect');
         if (modalSelect) {
             modalSelect.innerHTML = '';
-
-            // Standard Options
-            if (categories.length > 0) {
-                categories.forEach(cat => {
+            if (uniqueCats.size > 0) {
+                uniqueCats.forEach(cat => {
+                    if (cat === '__NEW__') return;
                     const opt = document.createElement('option');
                     opt.value = cat;
-                    opt.textContent = cat.charAt(0).toUpperCase() + cat.slice(1);
+                    opt.textContent = cat;
                     modalSelect.appendChild(opt);
                 });
             } else {
-                // If no categories, add a placeholder or just the New option
-                const opt = document.createElement('option');
-                opt.value = "";
-                opt.textContent = "-- Sin categorías --";
-                opt.disabled = true;
-                modalSelect.appendChild(opt);
+                modalSelect.innerHTML = '<option value="" disabled>-- Sin categorías --</option>';
             }
 
             // "Add New" Option
@@ -255,13 +291,15 @@ export const UI = {
     },
 
     renderDashboardAnalytics(inventory) {
-        // 1. Populate Brands Filter
+        if (!inventory) return;
+
+        // 1. Populate Brands Filter Dynamically
         const brandSelect = document.getElementById('dashFilterBrand');
-        if (brandSelect && brandSelect.options.length <= 1) { // Only populate if mostly empty
+        if (brandSelect) {
+            // Always refresh to ensure sync with current data
             brandSelect.innerHTML = '<option value="all">Todas las Marcas</option>';
-            const brands = [...new Set(inventory.map(i => i.brand))].sort();
+            const brands = [...new Set(inventory.map(i => i.brand || 'Unknown'))].sort();
             brands.forEach(b => {
-                if (!b) return;
                 const opt = document.createElement('option');
                 opt.value = b;
                 opt.textContent = b;
@@ -273,7 +311,7 @@ export const UI = {
         this.updateTopStockTable(inventory);
         this.updateLowStockList(inventory);
         this.updateBestSellers(inventory);
-        this.updateStats(inventory); // Keep existing stats
+        this.updateStats(inventory);
     },
 
     updateTopStockTable(inventory) {
@@ -295,7 +333,7 @@ export const UI = {
         tbody.innerHTML = top5.map(item => `
             <tr>
                 <td>${item.name}</td>
-                <td><span class="badge ${item.category}">${this.getCategoryLabel(item.category)}</span></td>
+                <td><span class="badge ${this.getCategoryClass(item.category)}">${this.getCategoryLabel(item.category)}</span></td>
                 <td>${item.brand}</td>
                 <td style="font-weight:bold; color: var(--success);">${item.stock}</td>
             </tr>
@@ -371,7 +409,7 @@ export const UI = {
             : 'https://placehold.co/600x400/png?text=No+Image';
 
         // Info
-        document.getElementById('detailCategory').className = `badge ${item.category}`;
+        document.getElementById('detailCategory').className = `badge ${this.getCategoryClass(item.category)}`;
         document.getElementById('detailCategory').textContent = this.getCategoryLabel(item.category);
         document.getElementById('detailName').textContent = item.name;
         document.getElementById('detailBrand').textContent = item.brand;

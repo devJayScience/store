@@ -1,0 +1,352 @@
+/* =========================================
+    VARIABLES Y RESET
+   ========================================= */
+:root {
+    --primary: #8b5cf6;
+    --primary-dark: #7c3aed;
+    --success: #10b981;
+    --danger: #ef4444;
+    --bg-light: #f8fafc;
+    /* Fondo general de la página */
+    --glass-border: rgba(0, 0, 0, 0.08);
+    --text-main: #1e293b;
+    --text-muted: #64748b;
+    /* Ajuste de inputs para fondo claro */
+    --input-fill: #ffffff;
+    --input-border: #cbd5e1;
+}
+
+/* =========================================
+    ESTRUCTURA DE VISTAS
+   ========================================= */
+.view {
+    width: 100%;
+    min-height: 100vh;
+    display: none;
+    /* Por defecto oculto */
+    padding: 2rem;
+    background-color: var(--bg-light);
+}
+
+.view.active-view {
+    display: block !important;
+    /* Se muestra solo la activa */
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* =========================================
+    PANEL PRINCIPAL (CARD)
+   ========================================= */
+.glass-panel {
+    background: #ffffff;
+    border: 1px solid var(--glass-border);
+    border-radius: 24px;
+    padding: 2.5rem;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05),
+        0 8px 10px -6px rgba(0, 0, 0, 0.05);
+}
+
+/* =========================================
+    FORMULARIO E INPUTS MEJORADOS
+   ========================================= */
+.creation-form {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin-bottom: 3rem;
+}
+
+@media (max-width: 768px) {
+    .creation-form {
+        grid-template-columns: 1fr;
+    }
+}
+
+.form-section label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-main);
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin-bottom: 0.6rem;
+}
+
+/* Inputs corregidos: Texto oscuro sobre fondo claro */
+.client-input,
+.product-search-input {
+    width: 100%;
+    height: 3.5rem;
+    padding: 0 1.2rem;
+    border-radius: 12px;
+    border: 1px solid var(--input-border);
+    background: var(--input-fill);
+    color: var(--text-main);
+    /* Texto visible */
+    font-size: 1rem;
+    font-family: 'Outfit', sans-serif;
+    transition: all 0.3s ease;
+}
+
+.product-search-input {
+    width: 100%;
+    height: 3.5rem;
+    padding: 1rem 1.2rem;
+    padding-left: 3.5rem !important;
+    /* Espacio para la lupa */
+    border-radius: 12px;
+    border: 1px solid #cbd5e1;
+    background: #ffffff;
+    /* Fondo blanco */
+    color: #1e293b !important;
+    /* TEXTO NEGRO/OSCURO para diferenciar */
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.client-input:focus,
+.product-search-input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.1);
+    background: #fff;
+}
+
+.search-bar-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.search-icon {
+    position: absolute;
+    left: 1.25rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    font-size: 1.1rem;
+    z-index: 10;
+}
+
+/* =========================================
+    TABLA DE PRODUCTOS (LEGIBILIDAD)
+   ========================================= */
+.quote-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.quote-table th {
+    text-align: left;
+    padding: 1rem;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 2px solid #f1f5f9;
+}
+
+.quote-table td {
+    padding: 1.25rem 1rem;
+    vertical-align: middle;
+    color: var(--text-main) !important;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+/* Estilo para las marcas */
+.col-brand span,
+.badge {
+    background: rgba(139, 92, 246, 0.08);
+    color: var(--primary) !important;
+    padding: 0.25rem 0.75rem;
+    border-radius: 99px;
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+
+.col-subtotal {
+    font-weight: 700;
+    color: var(--success) !important;
+}
+
+/* =========================================
+    FOOTER Y ACCIONES
+   ========================================= */
+.quote-footer {
+    margin-top: 3rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 2rem;
+    background: #f8fafc;
+    border-radius: 20px;
+    border: 1px solid #e2e8f0;
+}
+
+.total-display {
+    font-size: 3rem;
+    font-weight: 800;
+    color: var(--text-main) !important;
+    letter-spacing: -1px;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 1rem;
+}
+
+/* Botones con mejor profundidad */
+.btn-large {
+    padding: 0.75rem 1.5rem;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 0.95rem;
+    cursor: pointer;
+    border: none;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    transition: all 0.2s ease;
+}
+
+.btn-pdf {
+    background: white;
+    color: var(--success);
+    border: 2px solid var(--success);
+}
+
+.btn-pdf:hover {
+    background: var(--success);
+    color: white;
+}
+
+.btn-save {
+    background: var(--primary);
+    color: white;
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.25);
+}
+
+.btn-save:hover {
+    background: var(--primary-dark);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 15px rgba(139, 92, 246, 0.35);
+}
+
+/* =========================================
+    MODALES (FIJADOS)
+   ========================================= */
+.modal-overlay {
+    background: rgba(15, 23, 42, 0.5);
+    /* Backdrop más suave */
+    backdrop-filter: blur(4px);
+}
+
+.modal-content {
+    border: none;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+/* --- Autocompletado: Estilo profesional y visible --- */
+#paramAutocomplete {
+    position: absolute;
+    top: calc(100% + 5px);
+    left: 0;
+    right: 0;
+    background: #ffffff;
+    /* Fondo blanco para las sugerencias */
+    border: 1px solid var(--primary);
+    border-radius: 12px;
+    z-index: 9999;
+    max-height: 300px;
+    overflow-y: auto;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    padding: 0.5rem;
+}
+
+/* Estilo individual de cada sugerencia */
+.autocomplete-suggestion {
+    padding: 12px 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: background 0.2s;
+    color: #1e293b;
+    /* Texto en color oscuro */
+}
+
+.autocomplete-suggestion:hover {
+    background: #f1f5f9;
+    /* Color gris suave al pasar el mouse */
+}
+
+/* Forzar que el texto dentro de la sugerencia sea negro */
+.autocomplete-suggestion b,
+.autocomplete-suggestion span,
+.autocomplete-suggestion small {
+    color: #1e293b !important;
+}
+
+/* Color del precio en la sugerencia */
+.autocomplete-suggestion .suggestion-price {
+    color: var(--success) !important;
+    font-weight: 700;
+}
+
+.quote-header {
+    display: flex;
+    justify-content: space-between;
+    /* Esto empuja el botón a la derecha */
+    align-items: center;
+    margin-bottom: 2.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+/* =========================================
+   RESPONSIVE DESIGN (MOBILE) - ADDITIONS
+   ========================================= */
+@media (max-width: 768px) {
+    .quote-footer {
+        flex-direction: column;
+        gap: 1.5rem;
+        align-items: stretch;
+        text-align: center;
+    }
+
+    .total-info {
+        margin-bottom: 1rem;
+    }
+
+    .total-display {
+        font-size: 2.5rem;
+    }
+
+    .action-buttons {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .btn-large {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .quote-header {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: flex-start;
+    }
+
+    .quote-header h1 {
+        font-size: 1.8rem;
+    }
+
+    .quote-header .btn {
+        width: 100%;
+    }
+}

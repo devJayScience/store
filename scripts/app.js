@@ -14,8 +14,13 @@ document.addEventListener('DOMContentLoaded', () => {
         checkUrlParams();
     });
 
-    Storage.initializeFromJSON().then(() => {
-        loadData().then(() => checkUrlParams());
+    // Load data from Supabase
+    loadData().then(data => {
+        console.log('Data loaded successfully:', data);
+        checkUrlParams();
+    }).catch(err => {
+        console.error('Failed to load data:', err);
+        UI.showToast('Error cargando datos: ' + err.message, 'error');
     });
 
     setupEventListeners();
@@ -92,6 +97,7 @@ function checkUrlParams() {
         }
     }
 
+    // Dashboard-specific event listeners
     const dashCat = document.getElementById('dashFilterCategory');
     const dashBrand = document.getElementById('dashFilterBrand');
 
@@ -112,33 +118,50 @@ function checkUrlParams() {
     }
 }
 
-async function loadData() {
-    const [inventory, categories] = await Promise.all([
-        Storage.getInventory(),
-        Storage.getCategories()
-    ]);
 
-    currentInventory = inventory;
-    UI.populateCategoryFilter(categories);
-    refreshUI(currentInventory);
+async function loadData() {
+    try {
+        console.log('Fetching data from Supabase...');
+        const [inventory, categories] = await Promise.all([
+            Storage.getInventory(),
+            Storage.getCategories()
+        ]);
+
+        console.log('Inventory fetched:', inventory);
+        currentInventory = inventory;
+        UI.populateCategoryFilter(categories);
+        refreshUI(currentInventory);
+        return currentInventory;
+    } catch (error) {
+        console.error('CRITICAL ERROR LOADING DATA:', error);
+        alert('Error Crítico: No se puieron cargar los datos. Revisa la consola (F12). ' + error.message);
+        throw error;
+    }
 }
 
 function refreshUI(inventory) {
-    if (currentViewMode === 'grid') {
-        document.getElementById('inventoryGrid').classList.remove('hidden');
-        document.getElementById('inventoryTableContainer').classList.add('hidden');
-        const filtered = applyFilters(inventory);
-        UI.renderInventory(filtered);
-    } else {
-        document.getElementById('inventoryGrid').classList.add('hidden');
-        document.getElementById('inventoryTableContainer').classList.remove('hidden');
-        const filtered = applyFilters(inventory);
-        UI.renderInventoryTable(filtered);
+    // Only update inventory view if elements exist
+    if (document.getElementById('inventoryGrid')) {
+        if (currentViewMode === 'grid') {
+            document.getElementById('inventoryGrid').classList.remove('hidden');
+            const tableContainer = document.getElementById('inventoryTableContainer');
+            if (tableContainer) tableContainer.classList.add('hidden');
+
+            const filtered = applyFilters(inventory);
+            UI.renderInventory(filtered);
+        } else {
+            document.getElementById('inventoryGrid').classList.add('hidden');
+            const tableContainer = document.getElementById('inventoryTableContainer');
+            if (tableContainer) tableContainer.classList.remove('hidden');
+
+            const filtered = applyFilters(inventory);
+            UI.renderInventoryTable(filtered);
+        }
     }
 
-    UI.renderRecent(inventory);
-    UI.updateStats(inventory);
-    UI.renderDashboardAnalytics(inventory);
+    // Always update these if present (Dashboard elements)
+    if (document.getElementById('totalBooks')) UI.updateStats(inventory);
+    if (document.getElementById('topStockTable')) UI.renderDashboardAnalytics(inventory);
 }
 
 function setupEventListeners() {
@@ -152,51 +175,62 @@ function setupEventListeners() {
     const btnExport = document.getElementById('btnExport');
     if (btnExport) {
         btnExport.addEventListener('click', () => {
-            // Pass currentInventory to export
             Storage.exportToExcel(currentInventory);
             UI.showToast('Reporte descargado', 'success');
         });
     }
 
-    document.getElementById('viewGrid').addEventListener('click', () => {
-        currentViewMode = 'grid';
-        document.getElementById('viewGrid').classList.add('active');
-        document.getElementById('viewTable').classList.remove('active');
-        refreshUI(currentInventory);
-    });
-
-    document.getElementById('viewTable').addEventListener('click', () => {
-        currentViewMode = 'table';
-        document.getElementById('viewTable').classList.add('active');
-        document.getElementById('viewGrid').classList.remove('active');
-        refreshUI(currentInventory);
-    });
-
-    document.querySelectorAll('.nav-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            const viewId = e.currentTarget.dataset.view;
-            switchView(viewId);
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-            e.currentTarget.classList.add('active');
+    const viewGridBtn = document.getElementById('viewGrid');
+    if (viewGridBtn) {
+        viewGridBtn.addEventListener('click', () => {
+            currentViewMode = 'grid';
+            viewGridBtn.classList.add('active');
+            document.getElementById('viewTable').classList.remove('active');
+            refreshUI(currentInventory);
         });
-    });
+    }
 
-    document.getElementById('btnOpenModal').addEventListener('click', () => {
-        openModal();
-    });
+    const viewTableBtn = document.getElementById('viewTable');
+    if (viewTableBtn) {
+        viewTableBtn.addEventListener('click', () => {
+            currentViewMode = 'table';
+            viewTableBtn.classList.add('active');
+            document.getElementById('viewGrid').classList.remove('active');
+            refreshUI(currentInventory);
+        });
+    }
 
-    document.getElementById('btnCancelModal').addEventListener('click', closeModal);
+    // Modal Events
+    const btnOpenModal = document.getElementById('btnOpenModal');
+    if (btnOpenModal) {
+        btnOpenModal.addEventListener('click', () => {
+            openModal();
+        });
+    }
 
-    document.getElementById('itemForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        await handleFormSubmit(e); // Pass the event object
-        closeModal(); // Ensure modal closes
-    });
-    document.getElementById('searchInput').addEventListener('input', handleFilter);
-    document.getElementById('filterCategory').addEventListener('change', handleFilter);
-    document.getElementById('sortBy').addEventListener('change', handleFilter);
+    const btnCancelModal = document.getElementById('btnCancelModal');
+    if (btnCancelModal) {
+        btnCancelModal.addEventListener('click', closeModal);
+    }
 
-    // Demo button listener removed as per request
+    const itemForm = document.getElementById('itemForm');
+    if (itemForm) {
+        itemForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            await handleFormSubmit(e);
+            closeModal();
+        });
+    }
+
+    // Filter Events (only if on inventory page)
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) searchInput.addEventListener('input', handleFilter);
+
+    const filterCategory = document.getElementById('filterCategory');
+    if (filterCategory) filterCategory.addEventListener('change', handleFilter);
+
+    const sortBy = document.getElementById('sortBy');
+    if (sortBy) sortBy.addEventListener('change', handleFilter);
 
     // --- Logic for "Active" category select/input ---
     const catSelect = document.getElementById('itemCategorySelect');
@@ -278,31 +312,18 @@ function setupEventListeners() {
         }
     };
 
-    document.getElementById('inventoryGrid').addEventListener('click', handleAction);
-    document.getElementById('inventoryGrid').addEventListener('click', handleCardClick);
-    document.getElementById('inventoryTableBody').addEventListener('click', handleAction);
-}
-
-function switchView(viewName) {
-    document.querySelectorAll('.view').forEach(el => {
-        el.classList.remove('active-view');
-        el.style.display = 'none';
-    });
-
-    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-
-    if (viewName === 'inventory' || viewName === 'dashboard') {
-        const activeBtn = Array.from(document.querySelectorAll('.nav-btn')).find(b => b.dataset.view === viewName);
-        if (activeBtn) activeBtn.classList.add('active');
+    const grid = document.getElementById('inventoryGrid');
+    if (grid) {
+        grid.addEventListener('click', handleAction);
+        grid.addEventListener('click', handleCardClick);
     }
 
-    let targetId = viewName === 'dashboard' ? 'dashboardView' : 'inventoryView';
-    const target = document.getElementById(targetId);
-    if (target) {
-        target.style.display = 'block';
-        setTimeout(() => target.classList.add('active-view'), 10);
+    const tableBody = document.getElementById('inventoryTableBody');
+    if (tableBody) {
+        tableBody.addEventListener('click', handleAction);
     }
 }
+
 
 async function openModal(item = null) {
     const modal = document.getElementById('editModal');

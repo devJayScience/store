@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Listas - Inventario Pro</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles/main.css?v=4">
+    <link rel="stylesheet" href="styles/animations.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <link rel="stylesheet" href="styles/list.css">
+</head>
+
+<body>
+    <div class="background-blobs">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+    </div>
+
+    <div class="app-container">
+        <header class="glass-panel sidebar">
+            <div class="logo">
+                <i class="fa-solid fa-book-open-reader"></i>
+                <h1>Inventory</h1>
+            </div>
+            <button id="mobileMenuBtn" class="mobile-menu-btn">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+            <nav>
+                <a href="index.html" class="nav-btn">
+                    <i class="fa-solid fa-boxes-stacked"></i> Inventario
+                </a>
+                <a href="dashboard.html" class="nav-btn">
+                    <i class="fa-solid fa-chart-pie"></i> Dashboard
+                </a>
+                <a href="lista.html" class="nav-btn active">
+                    <i class="fa-solid fa-file-invoice-dollar"></i> Cotizaciones
+                </a>
+            </nav>
+        </header>
+
+        <main class="main-content">
+            <div id="galleryView" class="view active-view">
+                <div class="top-bar glass-panel">
+                    <div class="search-container">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="text" id="searchTerm" placeholder="Buscar cotizaciones...">
+                    </div>
+                    <div class="actions">
+                        <button class="btn btn-primary" id="btnNewQuote">
+                            <i class="fa-solid fa-plus"></i> Nueva Lista
+                        </button>
+                    </div>
+                </div>
+
+                <h2 style="margin: 1.5rem 0; color: #1e293b;">Cotizaciones Recientes</h2>
+
+                <div class="inventory-grid" id="quotesGrid"></div>
+
+                <div id="loadingState" class="hidden" style="text-align: center; padding: 2rem;">
+                    <i class="fa-solid fa-circle-notch fa-spin fa-2x" style="color: var(--primary);"></i>
+                    <p>Cargando cotizaciones...</p>
+                </div>
+            </div>
+
+            <div id="createView" class="view hidden">
+                <div class="glass-panel" id="printableArea" style="min-height: 80vh;">
+                    <div class="quote-header">
+                        <h1><i class="fa-solid fa-file-signature"></i> Nueva Lista</h1>
+                        <button class="btn btn-secondary" id="btnBack">
+                            <i class="fa-solid fa-arrow-left"></i> Volver
+                        </button>
+                    </div>
+
+                    <div class="creation-form">
+                        <div class="form-section">
+                            <label><i class="fa-solid fa-user"></i> Nombre del Cliente</label>
+                            <input type="text" id="clientName" class="client-input"
+                                placeholder="Nombre completo del cliente o empresa...">
+                        </div>
+                        <div class="form-section">
+                            <label><i class="fa-solid fa-magnifying-glass"></i> Agregar Productos</label>
+                            <div class="search-bar-wrapper">
+                                <i class="fa-solid fa-search search-icon"></i>
+                                <input type="text" id="productSearch" class="product-search-input"
+                                    placeholder="Escribe para buscar productos...">
+                                <div id="paramAutocomplete" class="autocomplete-suggestions hidden"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="quote-table">
+                            <thead>
+                                <tr>
+                                    <th>Producto</th>
+                                    <th>Marca</th>
+                                    <th>Precio</th>
+                                    <th style="text-align:center">Cantidad</th>
+                                    <th>Subtotal</th>
+                                    <th style="text-align:center">Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody id="quoteItemsBody">
+                            </tbody>
+                        </table>
+
+                        <div id="emptyQuoteState" style="text-align: center; padding: 3rem; opacity: 0.6;">
+                            <i class="fa-solid fa-cart-plus fa-3x" style="margin-bottom: 1rem;"></i>
+                            <p>Tu lista está vacía. Busca productos arriba para empezar.</p>
+                        </div>
+                    </div>
+
+                    <div class="quote-footer">
+                        <div class="total-info">
+                            <span class="total-label">Inversión Estimada</span>
+                            <div class="total-display" id="grandTotal">$0.00</div>
+                        </div>
+                        <div class="action-buttons">
+                            <button class="btn-large btn-pdf" id="btnWebPdf">
+                                <i class="fa-solid fa-file-pdf"></i> PDF
+                            </button>
+                            <button class="btn-large btn-save" id="btnSaveQuote">
+                                <i class="fa-solid fa-check-double"></i> Guardar Lista
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div class="modal-overlay hidden" id="confirmModal">
+        <div class="glass-panel modal-content animate-in">
+            <div style="font-size: 3.5rem; color: var(--primary); margin-bottom: 1rem;">
+                <i class="fa-solid fa-circle-question"></i>
+            </div>
+            <h2 id="confirmTitle">Confirmación</h2>
+            <p id="confirmMessage" style="margin-bottom: 2rem; color: #64748b;"></p>
+            <div class="action-buttons" style="justify-content: center; display: flex; gap: 1rem;">
+                <button class="btn-large" id="btnCancelConfirm" style="background:#e2e8f0; color:#475569;">No,
+                    cancelar</button>
+                <button class="btn-large btn-save" id="btnAcceptConfirm">Sí, continuar</button>
+            </div>
+        </div>
+    </div>
+    <div class="modal-overlay hidden" id="successModal">
+        <div class="glass-panel modal-content animate-in" style="max-width: 400px;">
+            <div style="font-size: 3.5rem; color: var(--success); margin-bottom: 1rem;">
+                <i class="fa-solid fa-circle-check"></i>
+            </div>
+            <h2 id="successTitle">¡Éxito!</h2>
+            <p id="successMessage" style="margin-bottom: 2rem; color: #64748b;"></p>
+            <button class="btn-large btn-save" id="btnCloseSuccess"
+                style="width:100%; justify-content:center;">Entendido</button>
+        </div>
+    </div>
+
+    <div class="mobile-menu-overlay" id="mobileMenuOverlay"></div>
+    <script type="module" src="scripts/lists.js"></script>
+</body>
+
+</html>

@@ -272,5 +272,138 @@ export const Storage = {
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
+    },
+
+    // --- Quotes Features (Supabase) ---
+
+    // En storage.js, asegúrate de que el select sea así:
+    async getQuoteDetails(quoteId) {
+        const { data, error } = await supabase
+            .from('detalle_cotizaciones')
+            .select(`
+            *,
+            productos:producto_id (
+                nombre,
+                marcas:marca_id ( nombre )
+            )
+        `)
+            .eq('cotizacion_id', quoteId);
+
+        if (error) throw error;
+        return data;
+    },
+
+    async getQuotes() {
+        try {
+            const { data, error } = await supabase
+                .from('cotizaciones')
+                .select('*')
+                .order('fecha_creacion', { ascending: false });
+
+            if (error) throw error;
+            return data;
+        } catch (err) {
+            console.error('Error fetching quotes:', err);
+            return [];
+        }
+    },
+
+
+    async createQuote(clientName, displayedTotal, items) {
+        try {
+            // 1. Create Quote Header
+            const { data: quote, error: quoteError } = await supabase
+                .from('cotizaciones')
+                .insert([{
+                    nombre_cliente: clientName,
+                    total_estimado: displayedTotal,
+                    estado: 'pendiente',
+                    fecha_creacion: new Date().toISOString()
+                }])
+                .select()
+                .single();
+
+            if (quoteError) throw quoteError;
+
+            // 2. Create Quote Details
+            const details = items.map(item => ({
+                cotizacion_id: quote.id,
+                producto_id: item.id,
+                cantidad: item.quantity,
+                precio_unitario_momento: item.price,
+                subtotal: item.price * item.quantity
+            }));
+
+            const { error: detailsError } = await supabase
+                .from('detalle_cotizaciones')
+                .insert(details);
+
+            if (detailsError) throw detailsError;
+
+            return quote;
+
+        } catch (err) {
+            console.error('Error creating quote:', err);
+            throw err;
+        }
+    },
+
+    async updateQuote(quoteId, clientName, displayedTotal, items) {
+        try {
+            // 1. Update Header
+            const { error: headerError } = await supabase
+                .from('cotizaciones')
+                .update({
+                    nombre_cliente: clientName,
+                    total_estimado: displayedTotal
+                })
+                .eq('id', quoteId);
+
+            if (headerError) throw headerError;
+
+            // 2. Delete Old Details
+            const { error: deleteError } = await supabase
+                .from('detalle_cotizaciones')
+                .delete()
+                .eq('cotizacion_id', quoteId);
+
+            if (deleteError) throw deleteError;
+
+            // 3. Insert New Details
+            const details = items.map(item => ({
+                cotizacion_id: quoteId,
+                producto_id: item.id,
+                cantidad: item.quantity,
+                precio_unitario_momento: item.price,
+                subtotal: item.price * item.quantity
+            }));
+
+            const { error: insertError } = await supabase
+                .from('detalle_cotizaciones')
+                .insert(details);
+
+            if (insertError) throw insertError;
+
+        } catch (err) {
+            console.error('Error updating quote:', err);
+            throw err;
+        }
+    },
+
+    async deleteQuote(id) {
+        try {
+            // Delete details first (if no cascade) - usually cascade handles it but let's be safe if manual
+            await supabase.from('detalle_cotizaciones').delete().eq('cotizacion_id', id);
+
+            const { error } = await supabase
+                .from('cotizaciones')
+                .delete()
+                .eq('id', id);
+
+            if (error) throw error;
+        } catch (err) {
+            console.error('Error deleting quote:', err);
+            throw err;
+        }
     }
 };

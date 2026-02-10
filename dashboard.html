@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Inventario Pro</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles/main.css?v=4">
+    <link rel="stylesheet" href="styles/animations.css">
+</head>
+
+<body>
+    <div class="background-blobs">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+    </div>
+
+    <div class="app-container">
+        <header class="glass-panel sidebar">
+            <div class="logo">
+                <i class="fa-solid fa-book-open-reader"></i>
+                <h1>Inventory</h1>
+            </div>
+            <button id="mobileMenuBtn" class="mobile-menu-btn">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+
+            <nav>
+                <a href="index.html" class="nav-btn">
+                    <i class="fa-solid fa-boxes-stacked"></i> Inventario
+                </a>
+                <a href="dashboard.html" class="nav-btn active">
+                    <i class="fa-solid fa-chart-pie"></i> Dashboard
+                </a>
+                <a href="lista.html" class="nav-btn">
+                    <i class="fa-solid fa-file-invoice-dollar"></i> Cotizaciones
+                </a>
+            </nav>
+
+            <div class="user-profile">
+                <img src="https://ui-avatars.com/api/?name=Admin+User&background=random" alt="Admin">
+                <div class="user-info">
+                    <p>Hola, Admin</p>
+                    <span>Gerente</span>
+                </div>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <div class="top-bar glass-panel">
+                <h2 style="margin: 0;">Resumen General</h2>
+                <div class="actions">
+                    <!-- Actions specific to dashboard if needed -->
+                </div>
+            </div>
+
+            <div id="dashboardView">
+                <div class="stats-grid">
+                    <div class="stat-card glass-panel staggered-anim">
+                        <div class="icon-box purple"><i class="fa-solid fa-book"></i></div>
+                        <div class="stat-info">
+                            <h3>Total Libros</h3>
+                            <p id="totalBooks">0</p>
+                        </div>
+                    </div>
+                    <div class="stat-card glass-panel staggered-anim">
+                        <div class="icon-box blue"><i class="fa-solid fa-pen-ruler"></i></div>
+                        <div class="stat-info">
+                            <h3>Papelería / Otros</h3>
+                            <p id="totalStationery">0</p>
+                        </div>
+                    </div>
+                    <div class="stat-card glass-panel staggered-anim">
+                        <div class="icon-box green"><i class="fa-solid fa-sack-dollar"></i></div>
+                        <div class="stat-info">
+                            <h3>Valor Total</h3>
+                            <p id="totalValue">$0.00</p>
+                        </div>
+                    </div>
+                    <div class="stat-card glass-panel staggered-anim">
+                        <div class="icon-box red"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                        <div class="stat-info">
+                            <h3>Stock Bajo</h3>
+                            <p id="lowStock">0</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="analytics-grid">
+                    <div class="glass-panel analytics-card" style="grid-column: span 2;">
+                        <div class="analytics-header">
+                            <h3><i class="fa-solid fa-arrow-trend-up"></i> Top Stock</h3>
+                            <div class="analytics-filters">
+                                <select id="dashFilterCategory" class="dash-select">
+                                    <option value="all">Todas las Categorías</option>
+                                    <option value="book">Libros</option>
+                                    <option value="stationery">Papelería</option>
+                                    <option value="art">Arte</option>
+                                    <option value="office">Oficina</option>
+                                </select>
+                                <select id="dashFilterBrand" class="dash-select">
+                                    <option value="all">Todas las Marcas</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="analytics-table">
+                                <thead>
+                                    <tr>
+                                        <th>Producto</th>
+                                        <th>Categoría</th>
+                                        <th>Marca</th>
+                                        <th>Stock</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="topStockTable"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="glass-panel analytics-card">
+                        <div class="analytics-header">
+                            <h3 style="color: var(--danger);"><i class="fa-solid fa-triangle-exclamation"></i> Stock
+                                Bajo</h3>
+                            <select id="dashFilterLowStockCat" class="dash-select">
+                                <option value="all">Todo</option>
+                                <option value="book">Libros</option>
+                                <option value="stationery">Papelería</option>
+                            </select>
+                        </div>
+                        <ul class="stock-list" id="lowStockList"></ul>
+                    </div>
+
+                    <div class="glass-panel analytics-card">
+                        <div class="analytics-header">
+                            <h3 style="color: var(--warning);"><i class="fa-solid fa-trophy"></i> Más Vendidos</h3>
+                            <select id="dashFilterBestCat" class="dash-select">
+                                <option value="all">Todo</option>
+                                <option value="book">Libros</option>
+                            </select>
+                        </div>
+                        <div class="best-sellers-list" id="bestSellersList"></div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script type="module" src="scripts/app.js"></script>
+</body>
+
+</html>

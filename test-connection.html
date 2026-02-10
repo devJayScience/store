@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Test Database Connection</title>
+    <style>
+        body {
+            font-family: monospace;
+            padding: 2rem;
+            background: #333;
+            color: #fff;
+        }
+
+        .status {
+            padding: 1rem;
+            margin-top: 1rem;
+            border-radius: 4px;
+        }
+
+        .success {
+            background: #10b981;
+            color: #fff;
+        }
+
+        .error {
+            background: #ef4444;
+            color: #fff;
+        }
+
+        .info {
+            background: #3b82f6;
+            color: #fff;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Supabase Connection Test</h1>
+    <div id="logs">Initializing...</div>
+
+    <script type="module">
+        import { supabase } from './scripts/supabase-client.js';
+
+        const log = (msg, type = 'info') => {
+            const el = document.createElement('div');
+            el.className = `status ${type}`;
+            el.textContent = `${new Date().toLocaleTimeString()} - ${msg}`;
+            document.body.appendChild(el);
+        };
+
+        async function testConnection() {
+            try {
+                log('Attempting to fetch items from "productos"...');
+
+                const { data, error } = await supabase
+                    .from('productos')
+                    .select('count', { count: 'exact', head: true });
+
+                if (error) {
+                    throw error;
+                }
+
+                log(`Connection Successful! Found ${data === null ? 'unknown' : 'valid'} response.`, 'success');
+
+                log('Attempting to fetch first 3 items...');
+                const { data: items, error: dataError } = await supabase
+                    .from('productos')
+                    .select('*')
+                    .limit(3);
+
+                if (dataError) throw dataError;
+
+                if (items.length === 0) {
+                    log('Connection working, but Table "productos" is EMPTY.', 'error');
+                } else {
+                    log(`Success! Retrieved ${items.length} items.`, 'success');
+                    log('First item: ' + JSON.stringify(items[0]), 'info');
+                }
+
+            } catch (err) {
+                log('CONNECTION FAILED: ' + err.message, 'error');
+                console.error(err);
+                if (err.measure || err.hint) log('Hint: ' + (err.hint || err.message), 'error');
+            }
+        }
+
+        testConnection();
+    </script>
+</body>
+
+</html>
