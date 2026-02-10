@@ -165,12 +165,36 @@ function refreshUI(inventory) {
 }
 
 function setupEventListeners() {
+    // --- MOBILE MENU LOGIC ---
     const mobileBtn = document.getElementById('mobileMenuBtn');
-    if (mobileBtn) {
-        mobileBtn.addEventListener('click', () => {
-            document.querySelector('nav').classList.toggle('active');
+    const sidebar = document.querySelector('.sidebar');
+    const overlay = document.getElementById('mobileMenuOverlay');
+
+    if (mobileBtn && sidebar) {
+        mobileBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            sidebar.classList.toggle('active');
+            if (overlay) overlay.classList.toggle('active');
         });
     }
+
+    if (overlay && sidebar) {
+        overlay.addEventListener('click', () => {
+            sidebar.classList.remove('active');
+            overlay.classList.remove('active');
+        });
+    }
+
+    // Close when clicking a link (UX Improvement)
+    const navLinks = document.querySelectorAll('.nav-btn');
+    navLinks.forEach(link => {
+        link.addEventListener('click', () => {
+            if (window.innerWidth <= 768) {
+                sidebar.classList.remove('active');
+                if (overlay) overlay.classList.remove('active');
+            }
+        });
+    });
 
     const btnExport = document.getElementById('btnExport');
     if (btnExport) {
